@@ -24,6 +24,16 @@ class WorkerInstrumentationTest {
     }
 
     @Test
+    fun cleanupWorker_doWork_resultSuccess() {
+        val worker = TestListenableWorkerBuilder<CleanupWorker>(context).build()
+        runBlocking {
+            val result = worker.doWork()
+            assertTrue(result is ListenableWorker.Result.Success)
+        }
+    }
+
+
+    @Test
     fun blurWorker_doWork_resultSuccessReturnsUri() {
         val worker = TestListenableWorkerBuilder<BlurWorker>(context)
             .setInputData(workDataOf(mockUriInput))
@@ -51,17 +61,10 @@ class WorkerInstrumentationTest {
             val resultUri = result.outputData.getString(KEY_IMAGE_URI)
             assertTrue(result is ListenableWorker.Result.Success)
             assertTrue(result.outputData.keyValueMap.containsKey(KEY_IMAGE_URI))
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                assertTrue(
-                    resultUri?.startsWith("content://media/external_primary/images/media/")
-                        ?: false
-                )
-            } else {
-                assertTrue(
-                    resultUri?.startsWith("content://media/external/images/media/")
-                        ?: false
-                )
-            }
+            assertTrue(
+                resultUri?.startsWith("content://media/external/images/media/")
+                    ?: false
+            )
         }
     }
 }
